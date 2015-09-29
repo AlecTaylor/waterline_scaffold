@@ -8,14 +8,183 @@ declare module WaterlineMod {
         new (): Wl;
         _collections: string[];
         _connections: {};
-        loadCollection(collection: {}): Collection;
-        initialize(options: {}, cb: (err: any, ontology: any) => void): InitError;
+        loadCollection(collection: {}): Model;
+        initialize(options: {}, cb: (err: any, ontology: any) => void): Model;
+        teardown(cb: (err: any, res: any) => void): void;
+        bootstrap(cb: (err: any, res: any) => void): void;
         Collection: Collection;
+        Model: Model;
     }
 
-    interface InitError {
-      err: any;
-      ontology: any;
+    interface Collection extends Core {
+        new (waterline: Wl, connections: {}, cb: cb): Collection;
+
+        connections: {};
+        waterline: Wl;
+        attributes: {};
+        extend(model: {}): Collection;
+    }
+
+    interface Core {
+        _attributes: {};
+        _cast: Cast;
+        _schema: Schema;
+        _validator: Validator;
+        _callbacks: {};
+        _instanceMethods;
+        new (options: {}): Core;
+
+        hasSchema: boolean;
+        migrate: string;
+
+        adapter: {};
+        connections: {};
+        defaults: {};
+    }
+
+    interface Cast {
+        _types: {};
+        new (): Cast;
+        initialize(attrs: {}): Cast;
+        run(values: {}): {};
+        string(str: string): string;
+        integer(key: string, value: any): number;
+        float(value: number): number;
+        boolean(value: boolean): boolean;
+        date(value: typeof Date): typeof Date;
+        array(value: any): any[];
+    }
+
+    interface Schema {
+        new (self: any): Cast;
+        initialize(attrs: {}, hasSchema: boolean, reservedAttributes: {}): Schema;
+        context: {};
+        schema: {};
+        objectAttribute(attrName: string, value: {}): {};
+        cleanValues(values: {}): {};
+    }
+
+    interface Validator {
+        new (adapter: string): Validator;
+        validations: {};
+        initialize(attrs: {}, types: {}, defaults: {}): {};
+        validate(values: {}, presentOnly: boolean, cb: cb): Error[];
+    }
+
+    interface Query {
+        adapter: AdapterBase;
+        sync(cb: cb): any;
+    }
+
+    interface AdapterBase extends Adapter {
+        /* anything go here? */
+    }
+
+    interface Adapter extends Dql, Ddl, compoundQueries, aggregateQueries, sync, stream {
+        new (options: {}): Adapter;
+        connections: {};
+        dictionary: {};
+        query: {};
+        collection: string;
+        identity: string;
+    }
+
+    interface Dql {
+        hasJoin(): boolean;
+        join(criteria: {}, cb: cb): void;
+        create(values: {}, cb: cb): {};
+        find(criteria: {}, cb: cb): {};
+        findOne(criteria: {}, cb: cb): {};
+        count(criteria: {}, cb: cb): number;
+        update(criteria: {}, values: {}, cb: cb): {};
+        destroy(criteria: {}, cb: cb): {};
+    }
+
+    interface Ddl {
+        define(cb: cb): { describe(err, existingAttributes): any };
+        describe(cb: cb): any;
+        drop(relations: {}, cb: cb): any;
+        alter(cb: cb): any;
+    }
+
+    interface compoundQueries {
+        findOrCreate(criteria: {}, values: {}, cb: cb): {};
+        findOne(criteria: {}, cb: cb): {};
+    }
+
+    interface aggregateQueries {
+        createEach(valuesList: any[], cb: cb): cbList;
+        findOrCreateEach(attributesToCheck: any[], valuesList: any[], cb: cb): cbList;
+    }
+
+    interface setupTeardown {
+        teardown(cb: cb): any;
+    }
+
+    interface sync {
+        migrateDrop(cb: cb): any;
+        migrateAlter(cb: cb): any;
+        migrateCreate(cb: cb): any;
+        migrateSafe(cb: cb): any;
+    }
+
+    interface stream {
+        stream(criteria: {}, stream: any): any;
+    }
+
+    interface Model extends Adapter {
+        new (context: {}, mixins: {}): Model;
+        create(params: Object): WaterlinePromise<QueryResult>;
+        create(params: Array<Object>): WaterlinePromise<QueryResult>;
+        create(params: Object, cb: (err: Error, created: QueryResult) => void): void;
+        create(params: Array<Object>, cb: (err: Error, created: Array<QueryResult>) => void): void;
+        toObject(): Object;
+        save(options: {}, cb: cb): any; // Promise
+        destroy(cb: cb): any; // Promise
+        _defineAssociations(): void;
+        _normalizeAssociations(): void;
+        _cast(values: {}): void;
+        validate(cb: cb): any; // Promise
+        toJSON(): JSON;
+    }
+
+    export interface WaterlinePromise<T> extends Promise<T> {
+        exec(cb: (err: Error, results: Array<QueryResult>) => void);
+        exec(cb: (err: Error, result: QueryResult) => void);
+    }
+
+    export interface QueryResult extends Record {
+        destroy(): Promise<Array<QueryResult>>;
+        toJSON(): Object;
+    }
+
+    export interface Record {
+        id: number;
+        createdAt: Date;
+        updatedAt: Date;
+    }
+
+    interface BaseModel {
+        _properties: {};
+        inspect: any;
+    }
+
+    interface cb {
+        (err: Error, res: any);
+    }
+
+    interface cbList {
+        (err: Error, res: any[]);
+    }
+
+
+
+
+
+    /*
+    interface SimpleCb {
+        err: any;
+        ontology: any;
     }
 
     export interface Model {
@@ -118,34 +287,7 @@ declare module WaterlineMod {
     interface Result<T> {
         done(callback: T): void;
     }
-
-    interface IQuery {
-        where(query: {}): IQuery;
-        skip(count: number): IQuery;
-        limit(count: number): IQuery;
-        sort(query: string): IQuery;
-        sort(query: {}): IQuery;
-        done(callback: MultipleResult): void;
-    }
-
-    interface CollectionInitializeCallback {
-        (err: Error, model: Collection): void;
-    }
-
-    export interface Collection {
-        constructor(options: {}, callback: CollectionInitializeCallback);
-        findOne(filter: any): Result<SingleResult>;
-        find(): IQuery;
-        find(query: {}): IQuery;
-        query(query: string): Result<MultipleResult>;
-
-        create(model: {}): Result<SingleResult>;
-        update(query: {}, change: {}, callback: Result<SingleResult>);
-        destroy(query: {}): Result<SingleResult>;
-
-        //static extend(model: {}): any;
-        extend(model: {}): any;
-    }
+    */
 
 }
 

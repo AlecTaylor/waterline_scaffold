@@ -40,17 +40,23 @@ export function init_db_conn() {
         }
 
         // Tease out fully initialised models.
-        var User = ontology.collections.user_tbl;
+        var User: WaterlineMod.Model = ontology.collections.user_tbl;
 
         // First we create a user.
         User.create({
             email: 'foo@bar.com',
             password: 'bfsdfsdf'
         }, function(err, model) {
-          console.error('err = ', err);
-          console.info('model = ', model);
+            console.error('err = ', err);
+            console.info('model = ', model);
         });
-        console.log('User created');
+        User.findOne({ email: 'foo@bar.com' }, (err, res) => {
+            console.error('err = ', err);
+            console.info('res = ', res);
+            var rec: WaterlineMod.QueryResult = res;
+            console.log('email = ' + rec['email']);
+            console.log(rec.toJSON());
+        })
     });
 }
 

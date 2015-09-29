@@ -1,8 +1,3 @@
-/// <reference path="./typings/node/node.d.ts"/>
-/// <reference path="./typings/lodash/lodash.d.ts"/>
-/// <reference path="./cust_typings/waterline.d.ts"/>
-/// <reference path="./cust_typings/sails-postgresql.d.ts"/>
-///// <reference path="typescript/src/lib/es6"/>
 'use strict';
 var Waterline = require('waterline');
 var sails_postgresql = require('sails-postgresql');
@@ -30,9 +25,7 @@ function init_db_conn() {
         if (err) {
             return console.error(err);
         }
-        // Tease out fully initialised models.
         var User = ontology.collections.user_tbl;
-        // First we create a user.
         User.create({
             email: 'foo@bar.com',
             password: 'bfsdfsdf'
@@ -40,7 +33,13 @@ function init_db_conn() {
             console.error('err = ', err);
             console.info('model = ', model);
         });
-        console.log('User created');
+        User.findOne({ email: 'foo@bar.com' }, function (err, res) {
+            console.error('err = ', err);
+            console.info('res = ', res);
+            var rec = res;
+            console.log('email = ' + rec['email']);
+            console.log(rec.toJSON());
+        });
     });
 }
 exports.init_db_conn = init_db_conn;
@@ -52,4 +51,3 @@ exports.init_all = init_all;
 if (require.main === module) {
     init_all();
 }
-//# sourceMappingURL=db.js.map
